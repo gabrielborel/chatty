@@ -44,4 +44,42 @@ export class ConnectionsService {
 
     return connection;
   }
+
+  async findAllWithoutAdmin(): Promise<Connection[]> {
+    const connections = await connectionsRepository.find({
+      where: {
+        admin_id: null,
+      },
+      relations: ["user"],
+    });
+
+    return connections;
+  }
+
+  async findBySocketID(socket_id: string) {
+    return await connectionsRepository.findOne({
+      where: {
+        socket_id,
+      },
+    });
+  }
+
+  async updateAdminID(user_id: string, admin_id: string) {
+    await connectionsRepository
+      .createQueryBuilder()
+      .update(Connection)
+      .set({ admin_id })
+      .where("user_id = :user_id", {
+        user_id,
+      })
+      .execute();
+  }
+
+  async deleteBySocketID(socket_id: string) {
+    await connectionsRepository
+      .createQueryBuilder()
+      .delete()
+      .where("socket_id = :socket_id", { socket_id })
+      .execute();
+  }
 }
